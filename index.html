@@ -1,1 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WC 2026 Sweepstake</title>
+</head>
+<body>
 
+<script>
+const API_KEY = 'YOUR_KEY_HERE'; // paste your football-data.org key
+
+const PARTICIPANTS = [
+  { name: 'Alice',   c1: 'England',     c2: 'Brazil'      },
+  { name: 'Bob',     c1: 'Spain',       c2: 'Germany'     },
+  { name: 'Charlie', c1: 'France',      c2: 'Argentina'   },
+  // add all 14-16 colleagues here...
+];
+
+async function fetchEliminated() {
+  // Fetch knockout results to find eliminated teams
+  const res = await fetch(
+    'https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_16',
+    { headers: { 'X-Auth-Token': API_KEY } }
+  );
+  const data = await res.json();
+  
+  const eliminated = new Set();
+  data.matches?.forEach(match => {
+    if (match.status === 'FINISHED') {
+      const home = match.homeTeam.name;
+      const away = match.awayTeam.name;
+      const hg = match.score.fullTime.home;
+      const ag = match.score.fullTime.away;
+      if (hg > ag) eliminated.add(away);
+      if (ag > hg) eliminated.add(home);
+    }
+  });
+  return eliminated;
+}
+
+async function calcProbabilities(eliminated) {
+  const alive = PARTICIPANTS.filter(
+    p => !eliminated.has(p.c1) || !eliminated.has(p.c2)
+  );
+  return PARTICIPANTS.map(p => {
+    const c1alive = !eliminated.has(p.c1);
+    const c2alive = !eliminated.has(p.c2);
+    const teamsAlive = (c1alive ? 1 : 0) + (c2alive ? 1 : 0);
+    const prob = alive.length > 0
+      ? (teamsAlive / (alive.length * 2)) * 100
+      : 0;
+    return { ...p, prob: Math.round(prob), c1alive, c2alive };
+  });
+}
+
+async function init() {
+  const eliminated = await fetchEliminated();
+  const standings = await calcProbabilities(eliminated);
+  standings.sort((a, b) => b.prob - a.prob);
+  // render to DOM here
+  console.log(standings); // check this works first
+}
+
+init();
+</script>
+</body>
+</html>
