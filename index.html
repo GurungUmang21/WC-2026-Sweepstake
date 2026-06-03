@@ -8,8 +8,6 @@
 
 <script>
 
-  <h1>Hello, it works</h1>
-
 const API_KEY = 'd30121e18d834b14b955a3b3cf722567'; // paste your football-data.org key
 
 const PARTICIPANTS = [
@@ -22,7 +20,7 @@ const PARTICIPANTS = [
 async function fetchEliminated() {
   // Fetch knockout results to find eliminated teams
   const res = await fetch(
-    'https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_16',
+    'https://api.football-data.org/v4/matches',
     { headers: { 'X-Auth-Token': API_KEY } }
   );
   const data = await res.json();
