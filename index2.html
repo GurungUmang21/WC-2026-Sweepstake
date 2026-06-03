@@ -1,1 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC 2026 Sweepstake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --gold: #C9A84C;
+    --pitch: #1a2e1a;
+    --pitch-mid: #243324;
+    --pitch-light: #2e402e;
+    --cream: #F5F0E8;
+    --cream-dim: #DDD8CF;
+    --accent: #E8C84A;
+    --danger: #E05555;
+    --success: #5DBD7A;
+    --muted: rgba(245,240,232,0.45);
+    --border: rgba(245,240,232,0.1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pitch);
+    color: var(--cream);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  /* ── HEADER ── */
+  header {
+    max-width: 860px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+  .header-left h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 58px);
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .status-pill {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .status-pill.pre { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .status-pill.live { background: rgba(93,189,122,0.15); color: var(--success); border: 1px solid rgba(93,189,122,0.3); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+  .btn-refresh {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--cream-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-refresh:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-refresh svg { width: 13px; height: 13px; }
+  .btn-refresh.spinning svg { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── STATS ROW ── */
+  .stats {
+    max-width: 860px;
+    margin: 0 auto 2rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .stat {
+    background: var(--pitch-mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 6px; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--cream); letter-spacing: 1px; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 300; }
+
+  /* ── LEADERBOARD ── */
+  .section-title {
+    max-width: 860px;
+    margin: 0 auto 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .leaderboard { max-width: 860px; margin: 0 auto 2rem; display: flex; flex-direction: column; gap: 6px; }
+
+  .entry {
+    background: var(--pitch-mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    display: grid;
+    grid-template-columns: 36px 1fr 120px 80px;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .entry:hover { border-color: rgba(245,240,232,0.2); }
+  .entry.eliminated { opacity: 0.35; }
+  .entry.rank-1 { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
+  .entry.rank-2 { border-color: rgba(180,180,190,0.3); }
+  .entry.rank-3 { border-color: rgba(160,110,70,0.3); }
+
+  .rank-badge {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    background: var(--pitch-light);
+    color: var(--muted);
+  }
+  .rank-badge.r1 { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .rank-badge.r2 { background: rgba(180,180,190,0.15); color: #B4B4BE; }
+  .rank-badge.r3 { background: rgba(160,110,70,0.15); color: #A06E46; }
+
+  .person-name { font-size: 15px; font-weight: 500; color: var(--cream); margin-bottom: 5px; }
+  .countries { display: flex; gap: 5px; flex-wrap: wrap; }
+  .ctag {
+    font-size: 11px; padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--pitch-light);
+    color: var(--cream-dim);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .ctag.eliminated-tag { text-decoration: line-through; opacity: 0.5; }
+  .ctag .flag { font-size: 13px; }
+
+  .prob-col { text-align: right; }
+  .prob-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--cream);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .prob-bar-wrap { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .prob-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+
+  .change-col { font-size: 11px; font-weight: 500; text-align: right; }
+  .change-col.up { color: var(--success); }
+  .change-col.down { color: var(--danger); }
+  .change-col.flat { color: var(--muted); }
+
+  /* ── BOTTOM PANELS ── */
+  .panels { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .panel {
+    background: var(--pitch-mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .panel-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
+
+  .result-row {
+    display: grid; grid-template-columns: 1fr 44px 1fr;
+    gap: 6px; align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-home { text-align: right; font-weight: 500; color: var(--cream-dim); }
+  .result-away { font-weight: 500; color: var(--cream-dim); }
+  .result-score { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--accent); background: var(--pitch-light); border-radius: 4px; padding: 2px 4px; }
+
+  .elim-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .elim-row:last-child { border-bottom: none; }
+  .elim-name { display: flex; align-items: center; gap: 6px; color: var(--cream-dim); }
+  .elim-stage { font-size: 10px; color: var(--muted); }
+
+  .footer { max-width: 860px; margin: 1.5rem auto 0; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+
+  /* ── ERROR / LOADING ── */
+  .notice {
+    max-width: 860px; margin: 0 auto 1rem;
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; display: none;
+  }
+  .notice.error { background: rgba(224,85,85,0.1); border: 1px solid rgba(224,85,85,0.3); color: #E08080; }
+  .notice.info { background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2,1fr); }
+    .panels { grid-template-columns: 1fr; }
+    .entry { grid-template-columns: 32px 1fr 90px; }
+    .change-col { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     CONFIGURATION — edit these two sections
+════════════════════════════════════════════════ -->
+<script>
+
+// ── 1. YOUR API KEY ──────────────────────────────
+// Get a free key at https://the-odds-api.com
+const API_KEY = 'YOUR_ODDS_API_KEY_HERE';
+
+// ── 2. YOUR PARTICIPANTS ─────────────────────────
+// Add/remove/rename entries. Countries must match
+// the name the API returns (check console on first run).
+const PARTICIPANTS = [
+  { name: 'Alice',   c1: 'England',   c2: 'Brazil'      },
+  { name: 'Bob',     c1: 'France',    c2: 'Germany'      },
+  { name: 'Charlie', c1: 'Argentina', c2: 'Spain'        },
+  { name: 'Diana',   c1: 'Portugal',  c2: 'Netherlands'  },
+  { name: 'Eve',     c1: 'USA',       c2: 'Mexico'       },
+  { name: 'Frank',   c1: 'Italy',     c2: 'Croatia'      },
+  { name: 'Grace',   c1: 'Uruguay',   c2: 'Colombia'     },
+  { name: 'Harry',   c1: 'Japan',     c2: 'South Korea'  },
+  { name: 'Isla',    c1: 'Morocco',   c2: 'Senegal'      },
+  { name: 'James',   c1: 'Belgium',   c2: 'Denmark'      },
+  { name: 'Kate',    c1: 'Switzerland','c2': 'Austria'   },
+  { name: 'Liam',    c1: 'Australia', c2: 'Ecuador'      },
+  { name: 'Mia',     c1: 'Turkey',    c2: 'Serbia'       },
+  { name: 'Noah',    c1: 'Canada',    c2: 'Peru'         },
+];
+
+// ── 3. CACHE DURATION ────────────────────────────
+// How long (ms) before odds are re-fetched.
+// 6 hours = 6 * 60 * 60 * 1000
+const CACHE_MS = 6 * 60 * 60 * 1000;
+
+// ── 4. TOURNAMENT START ──────────────────────────
+const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
+
+</script>
+<!-- ═══════════════════════════════════════════════ -->
+
+
+<!-- PAGE MARKUP -->
+<header>
+  <div class="header-left">
+    <h1>WC 2026 Sweepstake</h1>
+    <p id="subtitle">Loading odds...</p>
+  </div>
+  <div class="header-right">
+    <span class="status-pill pre" id="status-pill">Pre-tournament</span>
+    <button class="btn-refresh" id="btn-refresh" onclick="manualRefresh()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+      Refresh odds
+    </button>
+  </div>
+</header>
+
+<div class="notice error" id="error-box"></div>
+<div class="notice info" id="info-box"></div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Participants</div>
+    <div class="stat-val" id="stat-participants">—</div>
+    <div class="stat-sub">in the sweepstake</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Countries</div>
+    <div class="stat-val" id="stat-countries">—</div>
+    <div class="stat-sub">assigned</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Still alive</div>
+    <div class="stat-val" id="stat-alive">—</div>
+    <div class="stat-sub" id="stat-alive-sub">of participants</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Leader</div>
+    <div class="stat-val" id="stat-leader" style="font-size:18px;padding-top:4px;">—</div>
+    <div class="stat-sub" id="stat-leader-sub">—</div>
+  </div>
+</div>
+
+<p class="section-title">Leaderboard</p>
+<div class="leaderboard" id="leaderboard"></div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-title">Recent results</div>
+    <div id="results-list">
+      <p style="font-size:12px;color:var(--muted);">Tournament starts 11 Jun 2026</p>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Eliminated teams</div>
+    <div id="elim-list">
+      <p style="font-size:12px;color:var(--muted);">None yet</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span id="footer-source">Odds source: the-odds-api.com</span>
+  <span id="footer-updated">—</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SWAP POINT — change provider here only
+════════════════════════════════════════════════ -->
+<script>
+
+// ── FLAGS lookup ─────────────────────────────────
+const FLAGS = {
+  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+  'France':'🇫🇷','Germany':'🇩🇪','Spain':'🇪🇸','Italy':'🇮🇹',
+  'Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Denmark':'🇩🇰',
+  'Croatia':'🇭🇷','Switzerland':'🇨🇭','Austria':'🇦🇹','Turkey':'🇹🇷',
+  'Serbia':'🇷🇸','Poland':'🇵🇱','Ukraine':'🇺🇦','Hungary':'🇭🇺',
+  'Brazil':'🇧🇷','Argentina':'🇦🇷','Uruguay':'🇺🇾','Colombia':'🇨🇴',
+  'Ecuador':'🇪🇨','Chile':'🇨🇱','Peru':'🇵🇪','Paraguay':'🇵🇾',
+  'Bolivia':'🇧🇴','Venezuela':'🇻🇪','Mexico':'🇲🇽','USA':'🇺🇸',
+  'United States':'🇺🇸','Canada':'🇨🇦','Costa Rica':'🇨🇷','Panama':'🇵🇦',
+  'Honduras':'🇭🇳','Jamaica':'🇯🇲','Morocco':'🇲🇦','Senegal':'🇸🇳',
+  'Nigeria':'🇳🇬','Cameroon':'🇨🇲','Ghana':'🇬🇭','Egypt':'🇪🇬',
+  'Algeria':'🇩🇿','Tunisia':'🇹🇳','South Africa':'🇿🇦','Ivory Coast':'🇨🇮',
+  'Japan':'🇯🇵','South Korea':'🇰🇷','Australia':'🇦🇺','Iran':'🇮🇷',
+  'Saudi Arabia':'🇸🇦','Qatar':'🇶🇦','New Zealand':'🇳🇿','Uzbekistan':'🇺🇿',
+};
+
+const BAR_COLORS = [
+  '#C9A84C','#5DBD7A','#5B9BD5','#D85A9E','#E07850',
+  '#7B6FD4','#4DBDBD','#D4C24A','#BD5D5D','#5DBD9A',
+  '#A07BD4','#D47B4A','#4A9ED4','#D4A44A',
+];
+
+// ─────────────────────────────────────────────────
+// PROVIDER FUNCTION — swap this to change API
+// Returns: { 'England': 14.2, 'France': 18.5, ... }
+// ─────────────────────────────────────────────────
+async function fetchWinProbabilities() {
+
+  // ── Currently using: The Odds API ───────────────
+  // To switch provider: replace everything inside
+  // this function and update the normaliser below.
+  // Nothing outside this function needs to change.
+
+  const url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup_winner/odds` +
+              `?apiKey=${API_KEY}&regions=uk&markets=outrights&oddsFormat=decimal`;
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  return normaliseTheOddsAPI(data);
+}
+
+// Normaliser for The Odds API outright response
+function normaliseTheOddsAPI(data) {
+  const probs = {};
+  if (!data || !data.length) return probs;
+
+  // Average across all bookmakers for a fair probability
+  const sums = {};
+  const counts = {};
+
+  data.forEach(event => {
+    event.bookmakers?.forEach(bm => {
+      bm.markets?.forEach(market => {
+        if (market.key !== 'outrights') return;
+        market.outcomes?.forEach(o => {
+          const name = o.name;
+          const implied = parseFloat((1 / o.price * 100).toFixed(2));
+          sums[name] = (sums[name] || 0) + implied;
+          counts[name] = (counts[name] || 0) + 1;
+        });
+      });
+    });
+  });
+
+  Object.keys(sums).forEach(name => {
+    probs[name] = parseFloat((sums[name] / counts[name]).toFixed(2));
+  });
+
+  // Log all available team names to console — useful for
+  // matching your PARTICIPANTS array to API names
+  console.log('Teams returned by API:', Object.keys(probs).sort().join(', '));
+
+  return probs;
+}
+
+// ─────────────────────────────────────────────────
+// CACHING — saves API requests
+// ─────────────────────────────────────────────────
+function getCached() {
+  try {
+    const raw = localStorage.getItem('wc26_odds');
+    const ts  = localStorage.getItem('wc26_odds_ts');
+    if (!raw || !ts) return null;
+    if (Date.now() - parseInt(ts) > CACHE_MS) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+function setCache(data) {
+  try {
+    localStorage.setItem('wc26_odds', JSON.stringify(data));
+    localStorage.setItem('wc26_odds_ts', Date.now());
+  } catch {}
+}
+
+function getCacheAge() {
+  const ts = localStorage.getItem('wc26_odds_ts');
+  if (!ts) return null;
+  const mins = Math.floor((Date.now() - parseInt(ts)) / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.floor(mins/60)}h ago`;
+}
+
+// ─────────────────────────────────────────────────
+// ELIMINATED TEAMS — stored in localStorage
+// Update via browser console: addEliminated('Saudi Arabia')
+// ─────────────────────────────────────────────────
+function getEliminated() {
+  try {
+    const raw = localStorage.getItem('wc26_eliminated');
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function addEliminated(country) {
+  const set = getEliminated();
+  set.add(country);
+  localStorage.setItem('wc26_eliminated', JSON.stringify([...set]));
+  console.log(`${country} marked as eliminated. Refreshing...`);
+  init(true);
+}
+window.addEliminated = addEliminated; // expose to console
+
+function clearEliminated() {
+  localStorage.removeItem('wc26_eliminated');
+  console.log('Cleared all eliminated teams.');
+  init(true);
+}
+window.clearEliminated = clearEliminated;
+
+// ─────────────────────────────────────────────────
+// STANDINGS CALC
+// ─────────────────────────────────────────────────
+function calcStandings(probs, eliminated) {
+  return PARTICIPANTS.map(p => {
+    const c1elim = eliminated.has(p.c1);
+    const c2elim = eliminated.has(p.c2);
+    const p1 = c1elim ? 0 : (probs[p.c1] || 0);
+    const p2 = c2elim ? 0 : (probs[p.c2] || 0);
+    const totalProb = parseFloat((p1 + p2).toFixed(2));
+    return {
+      ...p,
+      c1elim, c2elim,
+      p1, p2,
+      totalProb,
+      isEliminated: c1elim && c2elim,
+    };
+  }).sort((a, b) => b.totalProb - a.totalProb);
+}
+
+// ─────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────
+function render(standings) {
+  const eliminated = getEliminated();
+  const rankColors = ['#C9A84C','#B4B4BE','#A06E46'];
+
+  // Stats row
+  const aliveCount = standings.filter(s => !s.isEliminated).length;
+  document.getElementById('stat-participants').textContent = PARTICIPANTS.length;
+  document.getElementById('stat-countries').textContent = PARTICIPANTS.length * 2;
+  document.getElementById('stat-alive').textContent = aliveCount;
+  document.getElementById('stat-alive-sub').textContent = `of ${PARTICIPANTS.length} players`;
+  if (standings[0]) {
+    document.getElementById('stat-leader').textContent = standings[0].name;
+    document.getElementById('stat-leader-sub').textContent = `${standings[0].totalProb}% win prob`;
+  }
+
+  // Status pill
+  const pill = document.getElementById('status-pill');
+  const started = new Date() >= TOURNAMENT_START;
+  if (started) {
+    pill.textContent = '● Live';
+    pill.className = 'status-pill live';
+  }
+
+  // Leaderboard
+  const lb = document.getElementById('leaderboard');
+  lb.innerHTML = '';
+  const maxProb = standings[0]?.totalProb || 1;
+
+  standings.forEach((s, i) => {
+    const rank = i + 1;
+    const color = BAR_COLORS[i % BAR_COLORS.length];
+    const rankCls = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+    const entryCls = s.isEliminated ? 'entry eliminated' : `entry${rank<=3?' rank-'+rank:''}`;
+
+    const div = document.createElement('div');
+    div.className = entryCls;
+    div.style.animationDelay = `${i * 40}ms`;
+
+    div.innerHTML = `
+      <div class="rank-badge ${rankCls}">${s.isEliminated ? '—' : rank}</div>
+      <div>
+        <div class="person-name">${s.name}</div>
+        <div class="countries">
+          <span class="ctag ${s.c1elim?'eliminated-tag':''}">
+            <span class="flag">${FLAGS[s.c1]||'🏳️'}</span>${s.c1}${s.p1>0?` · ${s.p1}%`:''}
+          </span>
+          <span class="ctag ${s.c2elim?'eliminated-tag':''}">
+            <span class="flag">${FLAGS[s.c2]||'🏳️'}</span>${s.c2}${s.p2>0?` · ${s.p2}%`:''}
+          </span>
+        </div>
+      </div>
+      <div class="prob-col">
+        <div class="prob-num">${s.isEliminated ? '0%' : s.totalProb + '%'}</div>
+        <div class="prob-bar-wrap">
+          <div class="prob-bar-fill" style="width:${s.isEliminated?0:Math.round(s.totalProb/maxProb*100)}%;background:${color};"></div>
+        </div>
+      </div>
+      <div class="change-col flat">—</div>`;
+    lb.appendChild(div);
+  });
+
+  // Eliminated panel
+  const elimList = document.getElementById('elim-list');
+  if (eliminated.size === 0) {
+    elimList.innerHTML = '<p style="font-size:12px;color:var(--muted);">None yet</p>';
+  } else {
+    elimList.innerHTML = [...eliminated].map(c => `
+      <div class="elim-row">
+        <div class="elim-name">${FLAGS[c]||'🏳️'} ${c}</div>
+        <div class="elim-stage">Eliminated</div>
+      </div>`).join('');
+  }
+}
+
+// ─────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────
+async function init(forceRefresh = false) {
+  const errorBox = document.getElementById('error-box');
+  const infoBox  = document.getElementById('info-box');
+  errorBox.style.display = 'none';
+  infoBox.style.display  = 'none';
+
+  document.getElementById('subtitle').textContent =
+    `${PARTICIPANTS.length} participants · ${PARTICIPANTS.length * 2} countries`;
+
+  const eliminated = getEliminated();
+  let probs = {};
+
+  // Use cache if fresh and not forcing refresh
+  const cached = !forceRefresh && getCached();
+
+  if (cached) {
+    probs = cached;
+    document.getElementById('footer-updated').textContent =
+      `Odds cached · updated ${getCacheAge()}`;
+  } else if (API_KEY === 'YOUR_ODDS_API_KEY_HERE') {
+    // No key yet — show info, use zero probs (equal ranking by name)
+    infoBox.textContent =
+      'Add your API key from the-odds-api.com to show real win probabilities. ' +
+      'Until then participants are listed alphabetically with 0%.';
+    infoBox.style.display = 'block';
+    document.getElementById('footer-updated').textContent = 'No API key set';
+  } else {
+    try {
+      const btn = document.getElementById('btn-refresh');
+      btn.classList.add('spinning');
+      probs = await fetchWinProbabilities();
+      setCache(probs);
+      btn.classList.remove('spinning');
+      document.getElementById('footer-updated').textContent =
+        `Odds updated just now · next auto-refresh in 6h`;
+    } catch (err) {
+      document.getElementById('btn-refresh').classList.remove('spinning');
+      errorBox.textContent = `Could not fetch odds: ${err.message}. Using cached data if available.`;
+      errorBox.style.display = 'block';
+      const fallback = getCached();
+      if (fallback) probs = fallback;
+      document.getElementById('footer-updated').textContent = `Using cached odds · ${getCacheAge()}`;
+    }
+  }
+
+  const standings = calcStandings(probs, eliminated);
+  render(standings);
+}
+
+// Auto-refresh every CACHE_MS if page is left open
+setInterval(() => init(), CACHE_MS);
+
+init();
+</script>
+</body>
+</html>
