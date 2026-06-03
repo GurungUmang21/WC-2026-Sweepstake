@@ -11,12 +11,12 @@
 
   :root {
     --gold: #C9A84C;
-    --pitch: #1a2e1a;
-    --pitch-mid: #243324;
-    --pitch-light: #2e402e;
+    --pitch: #002E4F;
+    --pitch-mid: #00213A;
+    --pitch-light: #002E4F;
     --cream: #F5F0E8;
     --cream-dim: #DDD8CF;
-    --accent: #E8C84A;
+    --accent: #E20F1D;
     --danger: #E05555;
     --success: #5DBD7A;
     --muted: rgba(245,240,232,0.45);
@@ -240,20 +240,25 @@ const API_KEY = 'YOUR_ODDS_API_KEY_HERE';
 // Add/remove/rename entries. Countries must match
 // the name the API returns (check console on first run).
 const PARTICIPANTS = [
-  { name: 'Alice',   c1: 'England',   c2: 'Brazil'      },
-  { name: 'Bob',     c1: 'France',    c2: 'Germany'      },
-  { name: 'Charlie', c1: 'Argentina', c2: 'Spain'        },
-  { name: 'Diana',   c1: 'Portugal',  c2: 'Netherlands'  },
-  { name: 'Eve',     c1: 'USA',       c2: 'Mexico'       },
-  { name: 'Frank',   c1: 'Italy',     c2: 'Croatia'      },
-  { name: 'Grace',   c1: 'Uruguay',   c2: 'Colombia'     },
-  { name: 'Harry',   c1: 'Japan',     c2: 'South Korea'  },
-  { name: 'Isla',    c1: 'Morocco',   c2: 'Senegal'      },
-  { name: 'James',   c1: 'Belgium',   c2: 'Denmark'      },
-  { name: 'Kate',    c1: 'Switzerland','c2': 'Austria'   },
-  { name: 'Liam',    c1: 'Australia', c2: 'Ecuador'      },
-  { name: 'Mia',     c1: 'Turkey',    c2: 'Serbia'       },
-  { name: 'Noah',    c1: 'Canada',    c2: 'Peru'         },
+  { name: 'Rob',   c1: 'Cape Verde',   c2: 'Brazil'      },
+  { name: 'Umang',     c1: 'Turkey',    c2: 'Jordan'      },
+  { name: 'Axel', c1: 'England', c2: ''        },
+  { name: 'Alex',   c1: 'Portugal',  c2: 'Netherlands'  },
+  { name: 'Louis',     c1: 'Japan',       c2: 'Canada'       },
+  { name: 'Anurag',   c1: 'Cape Verde',     c2: 'Uzbekistan'      },
+  { name: 'Udaya',   c1: 'Croatia',   c2: 'Belgium'     },
+  { name: 'Chamindu',   c1: 'France',     c2: 'South Korea'  },
+  { name: 'Gabriella',    c1: 'Netherlands',   c2: 'Senegal'      },
+  { name: 'Alexia',   c1: 'South Africa',   c2: 'Saudi Arabia'      },
+  { name: 'Judicael',    c1: 'Curacao','c2': 'Panama'   },
+  { name: 'Jude',    c1: 'Australia', c2: 'Ecuador'      },
+  { name: 'Lucie',     c1: 'Turkey',    c2: 'Serbia'       },
+  { name: 'Passiflore',    c1: 'Canada',    c2: 'Peru'         },
+  { name: 'Mehmet',    c1: 'Spain',    c2: 'Peru'         },
+  { name: 'Wy Kong',    c1: 'Canada',    c2: 'Peru'         },
+  { name: 'John',    c1: 'Canada',    c2: 'Peru'         },
+  { name: 'Victor',    c1: 'Canada',    c2: 'Peru'         },
+
 ];
 
 // ── 3. CACHE DURATION ────────────────────────────
@@ -343,7 +348,7 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
 
 // ── FLAGS lookup ─────────────────────────────────
 const FLAGS = {
-  'England':'','Scotland':'','Wales':'',
+  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
   'France':'🇫🇷','Germany':'🇩🇪','Spain':'🇪🇸','Italy':'🇮🇹',
   'Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Denmark':'🇩🇰',
   'Croatia':'🇭🇷','Switzerland':'🇨🇭','Austria':'🇦🇹','Turkey':'🇹🇷',
