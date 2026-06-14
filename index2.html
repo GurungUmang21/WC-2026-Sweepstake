@@ -107,13 +107,45 @@
   /* ── LEADERBOARD ── */
   .section-title {
     max-width: 860px;
-    margin: 0 auto 10px;
+    margin: 0 auto;
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--muted);
   }
-  .leaderboard { max-width: 860px; margin: 0 auto 2rem; display: flex; flex-direction: column; gap: 6px; }
+  .section-title2 {
+    max-width: 860px;
+    margin: 0 auto -5px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .leaderboard { margin: 0 auto ; display: flex; flex-direction: column; gap: 6px;}
+  .upcoming-matches { margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .right {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
   .entry {
     background: var(--pitch-mid);
@@ -177,7 +209,7 @@
   .change-col.flat { color: var(--muted); }
 
   /* ── BOTTOM PANELS ── */
-  .panels { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .panel {
     background: var(--pitch-mid);
     border: 1px solid var(--border);
@@ -206,7 +238,7 @@
   .elim-name { display: flex; align-items: center; gap: 6px; color: var(--cream-dim); }
   .elim-stage { font-size: 10px; color: var(--muted); }
 
-  .footer { max-width: 860px; margin: 1.5rem auto 0; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .footer { max-width: 860px; margin: 0 auto; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; }
 
   /* ── ERROR / LOADING ── */
   .notice {
@@ -222,10 +254,89 @@
     .panels { grid-template-columns: 1fr; }
     .entry { grid-template-columns: 32px 1fr 90px; }
     .change-col { display: none; }
+    .main { grid-template-columns: 1fr; }
   }
+
+  .match {
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+  .match:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.teams {
+  display: grid;
+  grid-template-columns: 1fr 28px 1fr;
+  gap: 4px;
+  align-items: start;
+  /*margin-bottom: 5px;*/
+}
+
+.team-name {
+  font-size: 12px;        /* ← reduce from 12px */
+  font-weight: 500;
+  color: var(--cream);
+  display: block;
+  word-break: break-word;
+  line-height: 1.3;
+  text-align: center;
+  max-width: 90px;
+}
+.participant {
+  font-size: 10px;
+  color: var(--gold);
+  display: block;
+  margin-top: 1px;
+}
+.participant.none { color: var(--muted); }
+.vs-badge {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--pitch-light);
+  border-radius: 4px;
+  padding: 2px 3px;
+  margin-top: 8px; /* ← nudges vs down to align with the team name, below the crest */
+  align-self: center;
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.venue {
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.time { font-size: 10px; color: var(--muted); }
+
+.crest { width: 24px; height: 24px; object-fit: contain; }
+
+.home {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.away {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
 </style>
 </head>
 <body>
+
+
 
 <!-- ═══════════════════════════════════════════════
      CONFIGURATION — edit these two sections
@@ -233,9 +344,10 @@
 <script>
 
 // ── 1. YOUR API KEY ──────────────────────────────
-// Get a free key at https://the-odds-api.com
-const API_KEY = 'ac2945038e90ed7ea6c12b6d826194cf';
-
+// a free key of https://the-odds-api.com
+const Odds_KEY = 'ac2945038e90ed7ea6c12b6d826194cf';
+// a free key of https://football-data.org
+const Football_KEY = 'd30121e18d834b14b955a3b3cf722567';
 // ── 2. YOUR PARTICIPANTS ─────────────────────────
 // Add/remove/rename entries. Countries must match
 // the name the API returns (check console on first run).
@@ -263,7 +375,7 @@ const PARTICIPANTS = [
 
 // ── 3. CACHE DURATION ────────────────────────────
 // How long (ms) before odds are re-fetched.
-// 6 hours = 6 * 60 * 60 * 1000
+// 12 hours = 12 * 60 * 60 * 1000
 const CACHE_MS = 12 * 60 * 60 * 1000;
 
 // ── 4. TOURNAMENT START ──────────────────────────
@@ -317,29 +429,36 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
   </div>
 </div>
 
-<p class="section-title">Leaderboard</p>
-<div class="leaderboard" id="leaderboard"></div>
-
-<div class="panels">
-  <div class="panel">
-    <div class="panel-title">Recent results</div>
-    <div id="results-list">
-      <p style="font-size:12px;color:var(--muted);">Tournament starts 11 Jun 2026</p>
+<div class="main">
+  <div class="left">
+    <p class="section-title">Leaderboard</p>
+    <div class="leaderboard" id="leaderboard"></div>
+  </div>
+  <div class="right">
+    <div class="section-title2">Upcoming matches</div>
+    <div class="panel">
+      <div class="upcoming-matches" id="upcoming-matches">
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Recent results</div>
+      <div id="results-list">
+        <p style="font-size:12px;color:var(--muted);">Tournament starts 11 Jun 2026</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Eliminated teams</div>
+      <div id="elim-list">
+        <p style="font-size:12px;color:var(--muted);">None yet</p>
+      </div>
     </div>
   </div>
-  <div class="panel">
-    <div class="panel-title">Eliminated teams</div>
-    <div id="elim-list">
-      <p style="font-size:12px;color:var(--muted);">None yet</p>
-    </div>
-  </div>
-</div>
 
 <div class="footer">
   <span id="footer-source">Odds source: the-odds-api.com</span>
+  <span id="footer-source">Matches source: football-data.org</span>
   <span id="footer-updated">—</span>
 </div>
-
 
 <!-- ═══════════════════════════════════════════════
      SWAP POINT — change provider here only
@@ -348,7 +467,7 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
 
 // ── FLAGS lookup ─────────────────────────────────
 const FLAGS = {
-  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+  'England':'🏴󠁧󠁢󠁥󠁮󠁧','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴','Wales':'🏴󠁧󠁢󠁷󠁬󠁳',
   'France':'🇫🇷','Germany':'🇩🇪','Spain':'🇪🇸','Italy':'🇮🇹',
   'Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Denmark':'🇩🇰',
   'Croatia':'🇭🇷','Switzerland':'🇨🇭','Austria':'🇦🇹','Turkey':'🇹🇷',
@@ -382,8 +501,11 @@ async function fetchWinProbabilities() {
   // Nothing outside this function needs to change.
 
   const url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup_winner/odds` +
-              `?apiKey=${API_KEY}&regions=uk&markets=outrights&oddsFormat=decimal`;
+              `?apiKey=${Odds_KEY}&regions=uk&markets=outrights&oddsFormat=decimal`;
 
+  const Football_url = `https://api.football-data.org/v4`;
+  
+  const headers = { 'X-Auth-Token': Football_KEY };
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -432,20 +554,20 @@ function normaliseTheOddsAPI(data) {
 // ─────────────────────────────────────────────────
 // CACHING — saves API requests
 // ─────────────────────────────────────────────────
-function getCached() {
+function getCached(key) {
   try {
-    const raw = localStorage.getItem('wc26_odds');
-    const ts  = localStorage.getItem('wc26_odds_ts');
+    const raw = localStorage.getItem(key);
+    const ts  = localStorage.getItem(`${key}_ts`);
     if (!raw || !ts) return null;
     if (Date.now() - parseInt(ts) > CACHE_MS) return null;
     return JSON.parse(raw);
   } catch { return null; }
 }
 
-function setCache(data) {
+function setCache(data, key) {
   try {
-    localStorage.setItem('wc26_odds', JSON.stringify(data));
-    localStorage.setItem('wc26_odds_ts', Date.now());
+    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(`${key}_ts`, Date.now());
   } catch {}
 }
 
@@ -485,6 +607,45 @@ function clearEliminated() {
 window.clearEliminated = clearEliminated;
 
 // ─────────────────────────────────────────────────
+// Upcoming matches
+// ─────────────────────────────────────────────────
+
+
+
+async function fetchAllData(){
+  const PROXY_URL = `https://long-bonus-c97a.umg-grg21.workers.dev`;
+  console.log('Fetching upcoming matches...');
+
+  try {
+    const res2 = await fetch(`${PROXY_URL}?path=/competitions/WC/matches`);
+    console.log('fetch response status:', res2.status); // does this print?
+    
+    const data = await res2.json();
+    console.log('data received:', data); // does this print?
+    
+    const result = {
+      upcoming: filterUpcoming(data.matches),
+      //recent:   filterRecent(data.matches),
+    };
+    
+    console.log('returning result:', result); // does this print?
+    return result;
+
+  } catch (err) {
+    console.error('fetchAllData crashed here:', err); // does THIS print?
+    return null;
+  }
+}
+
+function filterUpcoming(matches){
+  const now = new Date();
+  return matches
+    .filter(m => m.status === 'SCHEDULED' || m.status === 'TIMED')//&& new Date(m.utcDate) > now)
+    .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate))
+    .slice(0, 5);
+}
+
+// ─────────────────────────────────────────────────
 // STANDINGS CALC
 // ─────────────────────────────────────────────────
 function calcStandings(probs, eliminated) {
@@ -507,7 +668,7 @@ function calcStandings(probs, eliminated) {
 // ─────────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────────
-function render(standings) {
+function render(standings, footballData) {
   const eliminated = getEliminated();
   const rankColors = ['#C9A84C','#B4B4BE','#A06E46'];
 
@@ -568,6 +729,27 @@ function render(standings) {
     lb.appendChild(div);
   });
 
+  // Upcoming matches panel
+  /*const upcomingList = document.getElementById('upcoming-matches');
+  if (!footballData?.upcoming || footballData.upcoming.length === 0) {
+    upcomingList.innerHTML = '<p>No upcoming matches</p>';
+    return;
+  }
+
+  upcomingList.innerHTML = footballData.upcoming.map(m => {
+    const date = new Date(m.utcDate).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+    return `
+      <div class="match">
+        <span>${m.homeTeam.name}</span>
+        <span>vs</span>
+        <span>${m.awayTeam.name}</span>
+        <span>${date}</span>
+      </div>
+    `;
+  }).join('');*/
+
   // Eliminated panel
   const elimList = document.getElementById('elim-list');
   if (eliminated.size === 0) {
@@ -581,10 +763,58 @@ function render(standings) {
   }
 }
 
+function renderUpcoming(footballData) {
+  console.log('first:', footballData.upcoming[0]);
+  const container = document.getElementById('upcoming-matches');
+  if (!footballData?.upcoming || footballData.upcoming.length === 0) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--muted);">No upcoming matches</p>';
+    return;
+  }
+
+  container.innerHTML = footballData.upcoming.map(m => {
+    console.log('venue field:', m.venue);       // what is in venue?
+    console.log('full match object:', m);
+
+    // find which participant owns each team
+    const homeOwner = PARTICIPANTS.find(p => p.c1 === m.homeTeam.name || p.c2 === m.homeTeam.name);
+    const awayOwner = PARTICIPANTS.find(p => p.c1 === m.awayTeam.name || p.c2 === m.awayTeam.name);
+
+    const date = new Date(m.utcDate).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+
+    const venue = m.venue || m.homeTeam.area?.name || 'TBC';
+
+    return `
+      <div class="match">
+        <div class="teams">
+          <div class="home">
+            <img class="crest" src="${m.homeTeam.crest}" onerror="this.style.display='none'">
+            <span class="team-name">${m.homeTeam.name}</span>
+            <span class="participant ${homeOwner ? '' : 'none'}">${homeOwner ? homeOwner.name : '—'}</span>
+          </div>
+          <div class="vs-badge">vs</div>
+          <div class="away">
+            <img class="crest" src="${m.awayTeam.crest}" onerror="this.style.display='none'">
+            <span class="team-name">${m.awayTeam.name}</span>
+            <span class="participant ${awayOwner ? '' : 'none'}">${awayOwner ? awayOwner.name : '—'}</span>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="time">${date}</div>
+          <div class="venue"><i class="ti ti-map-pin" style="font-size:11px;" aria-hidden="true"></i>${venue}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+
+
 // ─────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────
 async function init(forceRefresh = false) {
+  console.log('INIT STARTED');
   const errorBox = document.getElementById('error-box');
   const infoBox  = document.getElementById('info-box');
   errorBox.style.display = 'none';
@@ -595,6 +825,8 @@ async function init(forceRefresh = false) {
 
   const eliminated = getEliminated();
   let probs = {};
+  let footballData = null;
+
 
   // Use cache if fresh and not forcing refresh
   const cached = !forceRefresh && getCached();
@@ -603,7 +835,7 @@ async function init(forceRefresh = false) {
     probs = cached;
     document.getElementById('footer-updated').textContent =
       `Odds cached · updated ${getCacheAge()}`;
-  } else if (API_KEY === 'YOUR_ODDS_API_KEY_HERE') {
+  } else if (Odds_KEY === '') {
     // No key yet — show info, use zero probs (equal ranking by name)
     infoBox.textContent =
       'Add your API key from the-odds-api.com to show real win probabilities. ' +
@@ -628,10 +860,41 @@ async function init(forceRefresh = false) {
       document.getElementById('footer-updated').textContent = `Using cached odds · ${getCacheAge()}`;
     }
   }
+  console.log('REACHED BLOCK 2');
 
+  // ── BLOCK 2: football data (fixtures, results, groups) ─
+  const cachedFootball = !forceRefresh && getCached('wc26_football');
+  console.log('cachedFootball:', cachedFootball);
+  
+  if (cachedFootball) {
+    footballData = cachedFootball;
+  } else {
+    try {
+      footballData = await fetchAllData();
+      setCache('wc26_football', footballData);
+    } catch (err) {
+      errorBox.textContent = `Could not fetch fixtures: ${err.message}`;
+      errorBox.style.display = 'block';
+      const fallback = getCached('wc26_football');
+      if (fallback) footballData = fallback;
+    }
+  }
+  console.log('BLOCK 2 DONE, footballData:', footballData);
   const standings = calcStandings(probs, eliminated);
-  render(standings);
+  render(standings,footballData);
+  renderUpcoming(footballData);
+
+  //console.log('footballData going into render:', footballData); // add this
 }
+
+function manualRefresh() {
+  localStorage.removeItem('wc26_odds');
+  localStorage.removeItem('wc26_odds_ts');
+  localStorage.removeItem('wc26_football');
+  localStorage.removeItem('wc26_football_ts');
+  init(true);
+}
+window.manualRefresh = manualRefresh;
 
 // Auto-refresh every CACHE_MS if page is left open
 setInterval(() => init(), CACHE_MS);
