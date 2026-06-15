@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0;}
 
   :root {
     --gold: #C9A84C;
@@ -122,7 +122,7 @@
     color: var(--muted);
   }
   .leaderboard { margin: 0 auto ; display: flex; flex-direction: column; gap: 6px;}
-  .upcoming-matches { margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+  .upcoming-matches { margin: -35px auto; display: flex; flex-direction: column; gap: 6px; }
 
   /* ── MAIN LAYOUT ── */
   .main {
@@ -153,7 +153,7 @@
     border-radius: 10px;
     padding: 13px 16px;
     display: grid;
-    grid-template-columns: 36px 1fr 120px 80px;
+    grid-template-columns: 32px 1fr 120px 10px;
     align-items: center;
     gap: 12px;
     transition: border-color 0.2s;
@@ -214,7 +214,7 @@
     background: var(--pitch-mid);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 16px;
+    padding: 50px;
   }
   .panel-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
 
@@ -305,6 +305,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-direction: column;
 }
 .venue {
   font-size: 10px;
@@ -332,6 +333,13 @@
   gap: 3px;
 }
 
+.ctag-crest {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
 </style>
 </head>
 <body>
@@ -357,14 +365,14 @@ const PARTICIPANTS = [
   { name: 'Axel', c1: 'England', c2: 'Senegal'        },
   { name: 'Alex',   c1: 'Portugal',  c2: 'Norway'  },
   { name: 'Louis',     c1: 'Japan',       c2: 'Canada'       },
-  { name: 'Anurag',   c1: 'Cape Verde',     c2: 'Uzbekistan'      },
+  { name: 'Anurag',   c1: 'Cape Verde Islands',     c2: 'Uzbekistan'      },
   { name: 'Udaya',   c1: 'Croatia',   c2: 'Belgium'     },
   { name: 'Chamindu',   c1: 'France',     c2: 'South Korea'  },
-  { name: 'Gabriella',    c1: 'Netherlands',   c2: 'Bosnia & Herzegovina'      },
+  { name: 'Gabriella',    c1: 'Netherlands',   c2: 'Bosnia-Herzegovina'      },
   { name: 'Alexia',   c1: 'South Africa',   c2: 'Saudi Arabia'      },
   { name: 'Judicael',    c1: 'Curaçao','c2': 'Panama'   },
   { name: 'Jude',    c1: 'Uruguay', c2: 'Ecuador'      },
-  { name: 'Lucie',     c1: 'Qatar',    c2: 'DR Congo'       },
+  { name: 'Lucie',     c1: 'Qatar',    c2: 'Congo DR'       },
   { name: 'Passiflore',    c1: 'New Zealand',    c2: 'Ghana'         },
   { name: 'Mehmet',    c1: 'Spain',    c2: 'Sweden'         },
   { name: 'Jordi',    c1: 'Egypt',    c2: 'Iraq'         },
@@ -617,19 +625,26 @@ async function fetchAllData(){
   console.log('Fetching upcoming matches...');
 
   try {
-    const res2 = await fetch(`${PROXY_URL}?path=/competitions/WC/matches`);
-    console.log('fetch response status:', res2.status); // does this print?
+    const matchRes = await fetch(`${PROXY_URL}?path=/competitions/WC/matches`);
+    const teamRes = await fetch(`${PROXY_URL}?path=/competitions/WC/teams`);
+    console.log('fetch response status:', teamRes.status); // does this print?
     
-    const data = await res2.json();
-    console.log('data received:', data); // does this print?
+    const matchData = await matchRes.json();
+    const teamData = await teamRes.json();
+    console.log('data received:', teamData); // does this print?
     
     const result = {
-      upcoming: filterUpcoming(data.matches),
-      //recent:   filterRecent(data.matches),
+      upcoming: filterUpcoming(matchData.matches),
+      //recent:   filterRecent(matchData.matches),
     };
+
+    const crests = {};
+    teamData.teams.forEach(t => {
+      crests[t.name] = t.crest;
+    });
     
     console.log('returning result:', result); // does this print?
-    return result;
+    return { ...result, crests };
 
   } catch (err) {
     console.error('fetchAllData crashed here:', err); // does THIS print?
@@ -648,7 +663,7 @@ function filterUpcoming(matches){
 // ─────────────────────────────────────────────────
 // STANDINGS CALC
 // ─────────────────────────────────────────────────
-function calcStandings(probs, eliminated) {
+function calcStandings(probs, eliminated, crests = {}) {
   return PARTICIPANTS.map(p => {
     const c1elim = eliminated.has(p.c1);
     const c2elim = eliminated.has(p.c2);
@@ -661,6 +676,8 @@ function calcStandings(probs, eliminated) {
       p1, p2,
       totalProb,
       isEliminated: c1elim && c2elim,
+      crest1: crests[p.c1] || null,
+      crest2: crests[p.c2] || null,
     };
   }).sort((a, b) => b.totalProb - a.totalProb);
 }
@@ -711,44 +728,30 @@ function render(standings, footballData) {
       <div>
         <div class="person-name">${s.name}</div>
         <div class="countries">
-          <span class="ctag ${s.c1elim?'eliminated-tag':''}">
-            <span class="flag">${FLAGS[s.c1]||'🏳️'}</span>${s.c1}${s.p1>0?` · ${s.p1}%`:''}
+          <span class="ctag ${s.c1elim ? 'eliminated-tag' : ''}">
+            ${s.crest1
+              ? `<img class="ctag-crest" src="${s.crest1}" onerror="this.style.display='none'">`
+              : '<span class="flag">' + (FLAGS[s.c1] || '🏳️') + '</span>'}
+            ${s.c1}${s.p1 > 0 ? ` · ${s.p1}%` : ''}
           </span>
-          <span class="ctag ${s.c2elim?'eliminated-tag':''}">
-            <span class="flag">${FLAGS[s.c2]||'🏳️'}</span>${s.c2}${s.p2>0?` · ${s.p2}%`:''}
+          <span class="ctag ${s.c2elim ? 'eliminated-tag' : ''}">
+            ${s.crest2
+              ? `<img class="ctag-crest" src="${s.crest2}" onerror="this.style.display='none'">`
+              : '<span class="flag">' + (FLAGS[s.c2] || '🏳️') + '</span>'}
+            ${s.c2}${s.p2 > 0 ? ` · ${s.p2}%` : ''}
           </span>
         </div>
       </div>
       <div class="prob-col">
         <div class="prob-num">${s.isEliminated ? '0%' : s.totalProb + '%'}</div>
         <div class="prob-bar-wrap">
-          <div class="prob-bar-fill" style="width:${s.isEliminated?0:Math.round(s.totalProb/maxProb*100)}%;background:${color};"></div>
+          <div class="prob-bar-fill" style="width:${s.isEliminated ? 0 : Math.round(s.totalProb / maxProb * 100)}%;background:${color};"></div>
         </div>
       </div>
       <div class="change-col flat">—</div>`;
     lb.appendChild(div);
   });
 
-  // Upcoming matches panel
-  /*const upcomingList = document.getElementById('upcoming-matches');
-  if (!footballData?.upcoming || footballData.upcoming.length === 0) {
-    upcomingList.innerHTML = '<p>No upcoming matches</p>';
-    return;
-  }
-
-  upcomingList.innerHTML = footballData.upcoming.map(m => {
-    const date = new Date(m.utcDate).toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-    });
-    return `
-      <div class="match">
-        <span>${m.homeTeam.name}</span>
-        <span>vs</span>
-        <span>${m.awayTeam.name}</span>
-        <span>${date}</span>
-      </div>
-    `;
-  }).join('');*/
 
   // Eliminated panel
   const elimList = document.getElementById('elim-list');
@@ -772,8 +775,9 @@ function renderUpcoming(footballData) {
   }
 
   container.innerHTML = footballData.upcoming.map(m => {
-    console.log('venue field:', m.venue);       // what is in venue?
-    console.log('full match object:', m);
+    console.log('hometeam:', m.homeTeam);       // what is in venue?
+    console.log('awayteam:', m.awayTeam);
+    console.log('match object:', m);
 
     // find which participant owns each team
     const homeOwner = PARTICIPANTS.find(p => p.c1 === m.homeTeam.name || p.c2 === m.homeTeam.name);
@@ -880,7 +884,7 @@ async function init(forceRefresh = false) {
     }
   }
   console.log('BLOCK 2 DONE, footballData:', footballData);
-  const standings = calcStandings(probs, eliminated);
+  const standings = calcStandings(probs, eliminated, footballData?.crests);
   render(standings,footballData);
   renderUpcoming(footballData);
 
