@@ -524,6 +524,18 @@ async function fetchWinProbabilities() {
   return normaliseTheOddsAPI(data);
 }
 
+const NAME_MAP = {
+ 'Cape Verde':'Cape Verde Islands',
+ 'DR Congo':'Congo DR',
+ 'Bosnia & Herzegovina':'Bosnia-Herzegovina'
+};
+
+ function normaliseCountryName(name){
+  return NAME_MAP[name] || name;
+ }
+
+
+ 
 // Normaliser for The Odds API outright response
 function normaliseTheOddsAPI(data) {
   const probs = {};
@@ -538,7 +550,7 @@ function normaliseTheOddsAPI(data) {
       bm.markets?.forEach(market => {
         if (market.key !== 'outrights') return;
         market.outcomes?.forEach(o => {
-          const name = o.name;
+          const name = normaliseCountryName(o.name);
           const implied = parseFloat((1 / o.price * 100).toFixed(2));
           sums[name] = (sums[name] || 0) + implied;
           counts[name] = (counts[name] || 0) + 1;
