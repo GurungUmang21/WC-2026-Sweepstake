@@ -123,7 +123,8 @@
   }
   .leaderboard { display: flex; flex-direction: column; gap: 6px;}
   .upcoming-matches { margin: -35px auto; display: flex; flex-direction: column; gap: 6px; }
-
+  .recent-results { margin: -35px auto; display: flex; flex-direction: column; gap: 6px; }
+  
   /* ── MAIN LAYOUT ── */
   .main {
     max-width: 860px;
@@ -227,8 +228,7 @@
   .result-row:last-child { border-bottom: none; }
   .result-home { text-align: right; font-weight: 500; color: var(--cream-dim); }
   .result-away { font-weight: 500; color: var(--cream-dim); }
-  .result-score { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--accent); background: var(--pitch-light); border-radius: 4px; padding: 2px 4px; }
-
+  
   .elim-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px;
@@ -266,8 +266,8 @@
 }
 .teams {
   display: grid;
-  grid-template-columns: 1fr 28px 1fr;
-  gap: 4px;
+  grid-template-columns: 2fr 35px 2fr;
+  gap: 10px;
   align-items: start;
   /*margin-bottom: 5px;*/
 }
@@ -447,11 +447,9 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
       <div class="upcoming-matches" id="upcoming-matches">
       </div>
     </div>
+    <div class="section-title2">Recent results</div>
     <div class="panel">
-      <div class="panel-title">Recent results</div>
-      <div id="results-list">
-        <p style="font-size:12px;color:var(--muted);">Update coming soon..</p>
-      </div>
+        <div class="recent-results" id="recent-results"></div>
     </div>
     <div class="panel">
       <div class="panel-title">Eliminated teams</div>
@@ -524,18 +522,6 @@ async function fetchWinProbabilities() {
   return normaliseTheOddsAPI(data);
 }
 
-const NAME_MAP = {
- 'Cape Verde':'Cape Verde Islands',
- 'DR Congo':'Congo DR',
- 'Bosnia & Herzegovina':'Bosnia-Herzegovina'
-};
-
-function normaliseCountryName(name){
- return NAME_MAP[name] || name;
-}
-
-
- 
 // Normaliser for The Odds API outright response
 function normaliseTheOddsAPI(data) {
   const probs = {};
@@ -550,7 +536,7 @@ function normaliseTheOddsAPI(data) {
       bm.markets?.forEach(market => {
         if (market.key !== 'outrights') return;
         market.outcomes?.forEach(o => {
-          const name = normaliseCountryName(o.name);
+          const name = o.name;
           const implied = parseFloat((1 / o.price * 100).toFixed(2));
           sums[name] = (sums[name] || 0) + implied;
           counts[name] = (counts[name] || 0) + 1;
@@ -646,7 +632,7 @@ async function fetchAllData(){
     
     const result = {
       upcoming: filterUpcoming(matchData.matches),
-      //recent:   filterRecent(matchData.matches),
+      recent:   filterResults(matchData.matches),
     };
 
     const crests = {};
@@ -668,6 +654,13 @@ function filterUpcoming(matches){
   return matches
     .filter(m => m.status === 'SCHEDULED' || m.status === 'TIMED')//&& new Date(m.utcDate) > now)
     .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate))
+    .slice(0, 5);
+}
+
+function filterResults(matches){
+  return matches
+    .filter(m => m.status === 'FINISHED')
+    .sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate))
     .slice(0, 5);
 }
 
@@ -786,9 +779,6 @@ function renderUpcoming(footballData) {
   }
 
   container.innerHTML = footballData.upcoming.map(m => {
-    console.log('hometeam:', m.homeTeam);       // what is in venue?
-    console.log('awayteam:', m.awayTeam);
-    console.log('match object:', m);
 
     // find which participant owns each team
     const homeOwner = PARTICIPANTS.find(p => p.c1 === m.homeTeam.name || p.c2 === m.homeTeam.name);
@@ -818,6 +808,40 @@ function renderUpcoming(footballData) {
         <div class="meta">
           <div class="time">${date}</div>
           <div class="venue"><i class="ti ti-map-pin" style="font-size:11px;" aria-hidden="true"></i>${venue}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderResults(footballData) {
+  console.log('results:', footballData.recent);
+  const container = document.getElementById('recent-results');
+  if (!footballData?.recent || footballData.recent.length === 0) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--muted);">No results yet</p>';
+    return;
+  }
+
+  container.innerHTML = footballData.recent.map(m => {
+    const homeOwner = PARTICIPANTS.find(p => p.c1 === m.homeTeam.name || p.c2 === m.homeTeam.name);
+    const awayOwner = PARTICIPANTS.find(p => p.c1 === m.awayTeam.name || p.c2 === m.awayTeam.name);
+
+    const homeScore = m.score.fullTime.home;
+    const awayScore = m.score.fullTime.away;
+
+    return `
+      <div class="match">
+        <div class="teams">
+          <div class="home">
+            <img class="crest" src="${m.homeTeam.crest}" onerror="this.style.display='none'">
+            <span class="team-name">${m.homeTeam.name}</span>
+            <span class="participant ${homeOwner ? '' : 'none'}">${homeOwner ? homeOwner.name : '—'}</span>
+          </div>
+          <div class="vs-badge">${homeScore} – ${awayScore}</div>
+          <div class="away">
+            <img class="crest" src="${m.awayTeam.crest}" onerror="this.style.display='none'">
+            <span class="team-name">${m.awayTeam.name}</span>
+            <span class="participant ${awayOwner ? '' : 'none'}">${awayOwner ? awayOwner.name : '—'}</span>
+          </div>
         </div>
       </div>`;
   }).join('');
@@ -898,7 +922,7 @@ async function init(forceRefresh = false) {
   const standings = calcStandings(probs, eliminated, footballData?.crests);
   render(standings,footballData);
   renderUpcoming(footballData);
-
+  renderResults(footballData);
   //console.log('footballData going into render:', footballData); // add this
 }
 
