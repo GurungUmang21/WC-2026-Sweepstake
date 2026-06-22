@@ -33,7 +33,7 @@
 
   /* ── HEADER ── */
   header {
-    max-width: 860px;
+    max-width: 1200px;
     margin: 0 auto 2.5rem;
     display: flex;
     align-items: flex-end;
@@ -88,7 +88,7 @@
 
   /* ── STATS ROW ── */
   .stats {
-    max-width: 860px;
+    max-width: 1200px;
     margin: 0 auto 2rem;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -106,7 +106,7 @@
 
   /* ── LEADERBOARD ── */
   .section-title {
-    max-width: 860px;
+    max-width: 1200px;
     margin: 0 auto;
     font-size: 10px;
     text-transform: uppercase;
@@ -114,7 +114,7 @@
     color: var(--muted);
   }
   .section-title2 {
-    max-width: 860px;
+    max-width: 1200px;
     margin: 0 auto -5px;
     font-size: 10px;
     text-transform: uppercase;
@@ -127,7 +127,7 @@
   
   /* ── MAIN LAYOUT ── */
   .main {
-    max-width: 860px;
+    max-width: 1200px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 280px;
@@ -216,6 +216,13 @@
     border-radius: 10px;
     padding: 40px;
   }
+
+  .panelStandings {
+    background: var(--pitch-mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
   .panel-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; }
 
   .result-row {
@@ -237,11 +244,11 @@
   .elim-name { display: flex; align-items: center; gap: 6px; color: var(--cream-dim); }
   .elim-stage { font-size: 10px; color: var(--muted); }
 
-  .footer { max-width: 860px; margin: 0 auto; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; }
+  .footer { max-width: 1200px; margin: 0 auto; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; }
 
   /* ── ERROR / LOADING ── */
   .notice {
-    max-width: 860px; margin: 0 auto 1rem;
+    max-width: 1200px; margin: 0 auto 1rem;
     padding: 10px 14px; border-radius: 8px;
     font-size: 12px; display: none;
   }
@@ -316,6 +323,12 @@
 .time { font-size: 10px; color: var(--muted); }
 
 .crest { width: 24px; height: 24px; object-fit: contain; }
+.standings-crest {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
 
 .home {
   text-align: right;
@@ -337,6 +350,130 @@
   height: 16px;
   object-fit: contain;
   vertical-align: middle;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+.toggle-bar {
+  max-width: 1200px;   /* match your .main max-width */
+  margin: 0 auto 10px; /* centres it and adds gap below */
+  display: flex;
+  grid-template-columns: 1fr 280px;
+  gap: 6px;
+}
+
+.toggle-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--pitch-mid);
+  color: var(--muted);
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.toggle-btn.active {
+  background: var(--pitch-mid);
+  color: var(--cream);
+  border-color: rgba(245,240,232,0.3);
+}
+
+/* form dots */
+.fd { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 1px; }
+.fw    { background: var(--success); }
+.fdraw { background: var(--gold); }
+.fl    { background: var(--danger); }
+
+/* position colours */
+.top td:first-child { color: var(--success); font-weight: 700; }
+.bot { opacity: 0.55; }
+.bot td:first-child { color: var(--danger); }
+
+#standings-table table {
+  background: var(--pitch-mid);
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  table-layout: fixed;   /* ← forces columns to respect widths */
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow:hidden
+  
+}
+
+#standings-table thead th {
+  color: var(--muted);
+  font-weight: 400;
+  text-align: right;
+  padding: 4px 5px;
+  font-size: 14px;
+  /*border-bottom: 1px solid var(--border);*/
+  border-left: 0.5px solid var(--border);
+  /*border: 0.5px solid var(--border);
+  border-radius: 10px;*/
+}
+
+#standings-table thead th:nth-child(1) { text-align: center; width: 15px; }
+#standings-table thead th:nth-child(2) { text-align: left; width: 80px; }
+#standings-table thead th:nth-child(3) { text-align: center; width: 13px; }  /* Grp */
+#standings-table thead th:nth-child(4),
+#standings-table thead th:nth-child(5),
+#standings-table thead th:nth-child(6),
+#standings-table thead th:nth-child(7),
+#standings-table thead th:nth-child(8),
+#standings-table thead th:nth-child(9) { text-align: center; width: 15px; }
+#standings-table thead th:nth-child(10) { text-align: center; width: 20px; }  /* P W D L GD Pts Prob% */
+/*#standings-table thead th:nth-child(11){ width: 44px; }  Form */
+
+#standings-table td {
+  padding: 5px 5px;
+  text-align: center;
+  color: var(--cream);
+  vertical-align: middle;   /* ← keeps everything in the middle of the row */
+  white-space: nowrap;      /* ← stops text wrapping and breaking layout */
+  border-left: 0.5px solid var(--border);
+  border-top: 0.5px solid var(--border);
+}
+
+#standings-table td:first-child {
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+#standings-table tbody tr:last-child {
+  /*border-bottom: 0.5px solid var(--border);*/
+}
+
+#standings-table .tc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;         /* ← stops long names breaking the layout */
+}
+
+#standings-table .tn {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* ← long names get ... instead of wrapping */
+  color: var(--cream);
+}
+
+.grp {
+  display: inline-block;
+  width: 16px;           /* fixed width regardless of letter */
+  height: 16px;          /* fixed height */
+  line-height: 16px;     /* vertically centres the letter */
+  text-align: center;    /* horizontally centres the letter */
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
 }
 
 </style>
@@ -379,6 +516,19 @@ const PARTICIPANTS = [
   { name: 'Victor',    c1: 'Algeria',    c2: 'Colombia'         },
 
 ];
+
+const NAME_MAP = {
+  // already have these
+  'Cape Verde':            'Cape Verde Islands',
+  'DR Congo':              'Congo DR',
+  'Bosnia & Herzegovina':  'Bosnia-Herzegovina',
+  'USA':                   'United States',
+  'Czech Republic':     'Czechia',
+};
+
+function normaliseCountryName(name) {
+  return NAME_MAP[name] || name;
+}
 
 // ── 3. CACHE DURATION ────────────────────────────
 // How long (ms) before odds are re-fetched.
@@ -436,11 +586,30 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
   </div>
 </div>
 
+<div class="toggle-bar">
+      <button class="toggle-btn active" onclick="switchView('leaderboard', this)">
+      🏆 Leaderboard
+      </button>
+      <button class="toggle-btn" onclick="switchView('standings', this)">
+      📊 Standings
+      </button>
+</div>
+
 <div class="main">
   <div class="left">
-    <p class="section-title">Leaderboard</p>
-    <div class="leaderboard" id="leaderboard"></div>
+    <!-- leaderboard view -->
+    <div class="view active" id="view-leaderboard">
+      <div class="leaderboard" id="leaderboard"></div>
+    </div>
+
+    <!-- standings view -->
+    
+      <div class="view" id="view-standings">
+        <div id="standings-table"></div>
+      </div>
+    
   </div>
+
   <div class="right">
     <div class="section-title2">Upcoming matches</div>
     <div class="panel">
@@ -536,7 +705,7 @@ function normaliseTheOddsAPI(data) {
       bm.markets?.forEach(market => {
         if (market.key !== 'outrights') return;
         market.outcomes?.forEach(o => {
-          const name = o.name;
+          const name = normaliseCountryName(o.name);
           const implied = parseFloat((1 / o.price * 100).toFixed(2));
           sums[name] = (sums[name] || 0) + implied;
           counts[name] = (counts[name] || 0) + 1;
@@ -555,6 +724,11 @@ function normaliseTheOddsAPI(data) {
 
   return probs;
 }
+
+Object.keys(NAME_MAP).forEach(oddsName => {
+  const mapped = normaliseCountryName(oddsName);
+  console.log(`"${oddsName}" → "${mapped}"`);
+});
 
 // ─────────────────────────────────────────────────
 // CACHING — saves API requests
@@ -622,18 +796,23 @@ async function fetchAllData(){
   console.log('Fetching upcoming matches...');
 
   try {
-    const matchRes = await fetch(`${PROXY_URL}?path=/competitions/WC/matches`);
-    const teamRes = await fetch(`${PROXY_URL}?path=/competitions/WC/teams`);
-    console.log('fetch response status:', teamRes.status); // does this print?
+    const [matchRes, teamRes, standingsRes] = await Promise.all([
+    fetch(`${PROXY_URL}?path=/competitions/WC/matches`),
+    fetch(`${PROXY_URL}?path=/competitions/WC/teams`),
+    fetch(`${PROXY_URL}?path=/competitions/WC/standings`)
+  ]);
+    //console.log('fetch response status:', teamRes.status); // does this print?
     
     const matchData = await matchRes.json();
     const teamData = await teamRes.json();
-    console.log('data received:', teamData); // does this print?
+    const standingsData = await standingsRes.json();
+    //console.log('data received:', teamData); // does this print?
     
     const result = {
       upcoming: filterUpcoming(matchData.matches),
       recent:   filterResults(matchData.matches),
-    };
+      standings: flattenStandings(standingsData)
+      }
 
     const crests = {};
     teamData.teams.forEach(t => {
@@ -685,6 +864,52 @@ function calcStandings(probs, eliminated, crests = {}) {
     };
   }).sort((a, b) => b.totalProb - a.totalProb);
 }
+
+function flattenStandings(standingsData) {
+  if (!standingsData?.standings) return [];
+
+  const allTeams = [];
+
+  standingsData.standings.forEach(group => {
+    console.log('raw group value:', group.group);
+    // each group has a 'table' array of team rows
+    group.table?.forEach(row => {
+      allTeams.push({
+        position:    row.position,
+        group:       group.group, // e.g. 'GROUP_A'
+        groupLabel:  group.group.slice(-1).toUpperCase(), // 'A', 'B' etc
+        name:        row.team.name,
+        crest:       row.team.crest,
+        id:          row.team.id,
+        played:      row.playedGames,
+        won:         row.won,
+        drawn:       row.draw,
+        lost:        row.lost,
+        goalsFor:    row.goalsFor,
+        goalsAgainst:row.goalsAgainst,
+        gd:          row.goalDifference,
+        points:      row.points,
+        form:        row.form || '',  // e.g. 'W,L,D' — may be null early on
+      });
+    });
+  });
+
+  // sort: points → GD → goals for → name (alphabetical tiebreaker)
+  return allTeams.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.gd     !== a.gd)     return b.gd     - a.gd;
+    if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+function switchView(view, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  btn.classList.add('active');
+}
+window.switchView = switchView;
 
 // ─────────────────────────────────────────────────
 // RENDER
@@ -847,6 +1072,95 @@ function renderResults(footballData) {
   }).join('');
 }
 
+function renderStandings(footballData, probs) {
+  const container = document.getElementById('standings-table');
+  if (!footballData?.standings || footballData.standings.length === 0) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--muted);">Standings not available yet</p>';
+    return;
+  }
+
+  // group colour map — extend as needed for all 12 groups
+  const GROUP_COLOURS = {
+    A:'#534AB7', B:'#1D9E75', C:'#D85A30', D:'#D4537E',
+    E:'#378ADD', F:'#639922', G:'#BA7517', H:'#E24B4A',
+    I:'#0F6E56', J:'#993C1D', K:'#7B6FD4', L:'#4DBDBD'
+  };
+
+  // form dot helper
+  function formDots(formStr) {
+    if (!formStr) return '<span style="font-size:10px;color:var(--muted);">—</span>';
+    return formStr.split(',').slice(0, 3).map(r => {
+      const cls = r === 'W' ? 'fw' : r === 'D' ? 'fdraw' : 'fl';
+      return `<span class="fd ${cls}"></span>`;
+    }).join('');
+  }
+
+  // position row colour
+  function rowClass(pos, pts) {
+    if (pts >= 7) return 'top';
+    if (pos >= 33) return 'bot';
+    return 'mid';
+  }
+
+  // find sweepstake owner
+  function getOwner(teamName) {
+    const p = PARTICIPANTS.find(p => p.c1 === teamName || p.c2 === teamName);
+    return p ? p.name : null;
+  }
+
+  const rows = footballData.standings.map((team, i) => {
+    const owner = getOwner(team.name);
+    const prob  = probs?.[team.name];
+    const probDisplay = prob
+      ? `<span class="prob" style="color:${prob > 5 ? '#3B6D11' : prob > 1 ? '#7a4b00' : '#999'};">${prob}%</span>`
+      : '<span style="color:var(--muted);">—</span>';
+    const groupColor = GROUP_COLOURS[team.groupLabel] || '#888';
+
+    //container.style.animationDelay = `${i * 40}ms`;
+
+    return `
+      <tr class="${rowClass(i + 1, team.points)}">
+        <td>${i + 1}</td>
+        <td>
+          <div class="tc">
+            <img class="standings-crest" src="${team.crest}" onerror="this.style.display='none'">
+            <span class="tn">${team.name}</span>
+            ${owner ? `<span class="participant">${owner}</span>` : ''}
+          </div>
+        </td>
+        <td><span class="grp" style="background:${groupColor};">${team.groupLabel}</span></td>
+        <td>${team.played}</td>
+        <td>${team.won}</td>
+        <td>${team.drawn}</td>
+        <td>${team.lost}</td>
+        <td>${team.gd >= 0 ? '+' : ''}${team.gd}</td>
+        <td class="pts">${team.points}</td>
+        <td>${probDisplay}</td>
+        <!-- <td>${formDots(team.form)}</td> -->
+      </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th style="text-align:left;">Team</th>
+          <th>Group</th>
+          <th>P</th>
+          <th>W</th>
+          <th>D</th>
+          <th>L</th>
+          <th>GD</th>
+          <th>Pts</th>
+          <th>Prob%</th>
+          <!-- <th>Form</th> -->
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
 
 
 // ─────────────────────────────────────────────────
@@ -901,6 +1215,7 @@ async function init(forceRefresh = false) {
   }
   console.log('REACHED BLOCK 2');
 
+
   // ── BLOCK 2: football data (fixtures, results, groups) ─
   const cachedFootball = !forceRefresh && getCached('wc26_football');
   console.log('cachedFootball:', cachedFootball);
@@ -923,8 +1238,15 @@ async function init(forceRefresh = false) {
   render(standings,footballData);
   renderUpcoming(footballData);
   renderResults(footballData);
+  renderStandings(footballData, probs);
   //console.log('footballData going into render:', footballData); // add this
+
+  window._probs        = probs;
+  window._participants = PARTICIPANTS;
 }
+
+
+  
 
 function manualRefresh() {
   localStorage.removeItem('wc26_odds');
