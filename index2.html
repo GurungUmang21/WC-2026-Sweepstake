@@ -743,20 +743,21 @@ function getCached(key) {
   } catch { return null; }
 }
 
-function setCache(data, key) {
+function setCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
     localStorage.setItem(`${key}_ts`, Date.now());
   } catch {}
 }
 
-function getCacheAge() {
-  const ts = localStorage.getItem('wc26_odds_ts');
+function getCacheAge(key) {
+  const ts = localStorage.getItem(`${key}_ts`);
   if (!ts) return null;
   const mins = Math.floor((Date.now() - parseInt(ts)) / 60000);
   if (mins < 60) return `${mins}m ago`;
   return `${Math.floor(mins/60)}h ago`;
 }
+
 
 // ─────────────────────────────────────────────────
 // ELIMINATED TEAMS — stored in localStorage
