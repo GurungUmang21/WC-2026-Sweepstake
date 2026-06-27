@@ -1201,7 +1201,7 @@ async function init(forceRefresh = false) {
       const btn = document.getElementById('btn-refresh');
       btn.classList.add('spinning');
       probs = await fetchWinProbabilities();
-      setCache(probs);
+      setCache('wc26_odds',probs);
       btn.classList.remove('spinning');
       document.getElementById('footer-updated').textContent =
         `Odds updated just now · next auto-refresh in 6h`;
