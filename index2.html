@@ -1183,12 +1183,12 @@ async function init(forceRefresh = false) {
 
 
   // Use cache if fresh and not forcing refresh
-  const cached = !forceRefresh && getCached();
+  const cached = !forceRefresh && getCached('wc26_odds');
 
   if (cached) {
     probs = cached;
     document.getElementById('footer-updated').textContent =
-      `Odds cached · updated ${getCacheAge()}`;
+      `Odds cached · updated ${getCacheAge('wc26_odds')}`;
   } else if (Odds_KEY === '') {
     // No key yet — show info, use zero probs (equal ranking by name)
     infoBox.textContent =
@@ -1201,7 +1201,7 @@ async function init(forceRefresh = false) {
       const btn = document.getElementById('btn-refresh');
       btn.classList.add('spinning');
       probs = await fetchWinProbabilities();
-      setCache('wc26_odds',probs);
+      setCache('wc26_odds', probs);
       btn.classList.remove('spinning');
       document.getElementById('footer-updated').textContent =
         `Odds updated just now · next auto-refresh in 6h`;
@@ -1209,9 +1209,9 @@ async function init(forceRefresh = false) {
       document.getElementById('btn-refresh').classList.remove('spinning');
       errorBox.textContent = `Could not fetch odds: ${err.message}. Using cached data if available.`;
       errorBox.style.display = 'block';
-      const fallback = getCached();
+      const fallback = getCached('wc26_odds');
       if (fallback) probs = fallback;
-      document.getElementById('footer-updated').textContent = `Using cached odds · ${getCacheAge()}`;
+      document.getElementById('footer-updated').textContent = `Using cached odds · ${getCacheAge('wc26_odds')}`;
     }
   }
   console.log('REACHED BLOCK 2');
