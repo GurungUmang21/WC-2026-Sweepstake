@@ -590,6 +590,9 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
       <button class="toggle-btn active" onclick="switchView('leaderboard', this)">
       🏆 Leaderboard
       </button>
+      <button class="toggle-btn" onclick="switchView('bracket', this)">
+  🎯 Bracket
+      </button>
       <button class="toggle-btn" onclick="switchView('standings', this)">
       📊 Standings
       </button>
@@ -600,6 +603,11 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
     <!-- leaderboard view -->
     <div class="view active" id="view-leaderboard">
       <div class="leaderboard" id="leaderboard"></div>
+    </div>
+
+    <!-- bracket view -->
+    <div class="view" id="view-bracket">
+      <div id="bracket"></div>
     </div>
 
     <!-- standings view -->
@@ -637,6 +645,8 @@ const TOURNAMENT_START = new Date('2026-06-11T18:00:00Z');
 <!-- ═══════════════════════════════════════════════
      SWAP POINT — change provider here only
 ════════════════════════════════════════════════ -->
+<script src="bracket.js"></script>
+
 <script>
 
 // ── FLAGS lookup ─────────────────────────────────
@@ -758,7 +768,6 @@ function getCacheAge(key) {
   return `${Math.floor(mins/60)}h ago`;
 }
 
-
 // ─────────────────────────────────────────────────
 // ELIMINATED TEAMS — stored in localStorage
 // Update via browser console: addEliminated('Saudi Arabia')
@@ -794,7 +803,7 @@ window.clearEliminated = clearEliminated;
 
 async function fetchAllData(){
   const PROXY_URL = `https://long-bonus-c97a.umg-grg21.workers.dev`;
-  console.log('Fetching upcoming matches...');
+  //console.log('Fetching upcoming matches...');
 
   try {
     const [matchRes, teamRes, standingsRes] = await Promise.all([
@@ -812,7 +821,8 @@ async function fetchAllData(){
     const result = {
       upcoming: filterUpcoming(matchData.matches),
       recent:   filterResults(matchData.matches),
-      standings: flattenStandings(standingsData)
+      standings: flattenStandings(standingsData),
+      bracket: filterBracketMatches(matchData.matches),
       }
 
     const crests = {};
@@ -820,7 +830,7 @@ async function fetchAllData(){
       crests[t.name] = t.crest;
     });
     
-    console.log('returning result:', result); // does this print?
+    //console.log('returning result:', result); // does this print?
     return { ...result, crests };
 
   } catch (err) {
@@ -842,6 +852,21 @@ function filterResults(matches){
     .filter(m => m.status === 'FINISHED')
     .sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate))
     .slice(0, 5);
+}
+
+function filterBracketMatches(matches) {
+  const knockoutStages = [
+    'LAST_32',
+    'LAST_16',
+    'QUARTER_FINALS',
+    'SEMI_FINALS',
+    'THIRD_PLACE',
+    'FINAL'
+  ];
+  return matches
+    .filter(m => knockoutStages.includes(m.stage))
+    .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+  // no .slice() — return all of them
 }
 
 // ─────────────────────────────────────────────────
@@ -909,6 +934,15 @@ function switchView(view, btn) {
   document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   btn.classList.add('active');
+
+  const main = document.querySelector('.main');
+  if (view === 'bracket') {
+    main.style.gridTemplateColumns = '1fr';
+    document.querySelector('.right').style.display = 'none';
+  } else {
+    main.style.gridTemplateColumns = '1fr 280px';  // your existing column sizes
+    document.querySelector('.right').style.display = 'flex';
+  }
 }
 window.switchView = switchView;
 
@@ -1240,6 +1274,7 @@ async function init(forceRefresh = false) {
   renderUpcoming(footballData);
   renderResults(footballData);
   renderStandings(footballData, probs);
+  renderBracket(footballData);
   //console.log('footballData going into render:', footballData); // add this
 
   window._probs        = probs;
