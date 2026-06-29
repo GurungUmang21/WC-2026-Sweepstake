@@ -192,8 +192,8 @@ function buildScoreSVG(rounds) {
       const match = matches[pairIdx];
       const score = match ? bracketScore(match) : null;
       const label = score;
-      const color = score ? BRACKET_COLORS.score : BRACKET_COLORS.scoreTBD;
-      const fw = score ? '700' : '400';
+      const color = BRACKET_COLORS.score;
+      const fw = '700';
       const fs = ringIdx === 0 ? 1.8 : ringIdx === 1 ? 2 : 2.4;
 
       const slotA = pairIdx * 2;
@@ -207,17 +207,19 @@ function buildScoreSVG(rounds) {
       // Determine arc direction (always draw shorter arc)
       const sweep = 1;
 
-      texts += `<defs>
-        <path id="${arcId}"
-          d="${svgArc(pA, pB, ring.radius, sweep)}"
-          fill="none"/>
-      </defs>
-      <text font-size="${fs}" font-weight="${fw}"
+      if (label) {
+        texts += `<defs>
+            <path id="${arcId}"
+            d="${svgArc(pA, pB, ring.radius, sweep)}"
+            fill="none"/>
+        </defs>
+        <text font-size="${fs}" font-weight="${fw}"
         fill="${color}" font-family="system-ui,sans-serif">
-        <textPath href="#${arcId}" startOffset="50%" text-anchor="middle">
-          ${label}
-        </textPath>
-      </text>`;
+            <textPath href="#${arcId}" startOffset="50%" text-anchor="middle">
+            ${label}
+            </textPath>
+        </text>`;
+        }
     }
   });
 
